@@ -1,0 +1,80 @@
+services:
+  zookeeper:
+    image: quay.io/debezium/zookeeper:latest
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - cdc-network
+
+  kafka:
+    image: quay.io/debezium/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+    volumes:
+      - kafka-data-tugas-cdc:/kafka/data
+    networks:
+      - cdc-network
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8070:8080"
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    networks:
+      - cdc-network
+
+  debezium-connect:
+    build:
+      context: .
+    container_name: debezium-connect
+    depends_on:
+      - kafka
+      - zookeeper
+    environment:
+      - BOOTSTRAP_SERVERS=localhost:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
+      - CONFIG_STORAGE_REPLICATION_FACTOR=1
+      - OFFSET_STORAGE_REPLICATION_FACTOR=1
+      - STATUS_STORAGE_REPLICATION_FACTOR=1
+    network_mode: host
+
+  postgres-source:
+    image: postgres:16-alpine
+    container_name: postgres-source 
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-source.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data-tugas-cdc:/var/lib/postgresql/data
+    command: |
+      postgres 
+      -c wal_level=logical 
+      -c max_replication_slots=10 
+      -c max_wal_senders=10
+    networks:
+      - cdc-network
+
+networks:
+  cdc-network:
+    driver: bridge
+
+volumes:
+  postgres-data-tugas-cdc:
+  kafka-data-tugas-cdc:

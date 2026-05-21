@@ -1,0 +1,15 @@
+services:
+  sqlserver-dest:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver-dest
+    env_file:
+        - .env
+    ports:
+      - "1434:1433"
+    command: /bin/bash /init.sh
+    volumes:
+      - ./init-destination.sh:/init.sh
+      - sqlserver-data-tugas-cdc:/var/opt/mssql
+
+volumes:
+  sqlserver-data-tugas-cdc:

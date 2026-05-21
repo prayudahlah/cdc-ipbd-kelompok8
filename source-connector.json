@@ -1,0 +1,15 @@
+{
+    "name": "postgres-source-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "database.hostname": "localhost",
+        "database.port": "5432",
+        "database.user": "postgres",
+        "database.password": "postgres",
+        "database.dbname": "kuliah",
+        "topic.prefix": "dbserver1",
+        "plugin.name": "pgoutput",
+        "table.include.list": "public.mahasiswa",
+        "snapshot.mode": "initial"
+    }
+}
