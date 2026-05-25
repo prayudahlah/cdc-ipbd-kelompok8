@@ -4,7 +4,7 @@
         "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
         "tasks.max": "1",
         "topics": "dbserver1.public.mahasiswa",
-        "connection.url": "jdbc:sqlserver://localhost:1434;databaseName=kuliah;encrypt=false",
+        "connection.url": "jdbc:sqlserver://meiva:1434;databaseName=kuliah;encrypt=false",
         "connection.username": "sa",
         "connection.password": "YourStrong@Passw0rd",
         "insert.mode": "upsert",
